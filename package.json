@@ -7,16 +7,8 @@
     "create-react-app": "^1.5.2",
     "express": "^4.16.3",
     "express-generator": "^4.16.0",
-    "get-json": "^1.0.1",
-    "https": "^1.0.0",
     "isomorphic-fetch": "^2.2.1",
-    "nba": "^4.5.0",
-    "node-fetch": "^2.3.0",
-    "nodemon": "^1.18.3",
-    "request": "^2.88.0",
-    "tryjson": "^1.1.4",
-    "xhr2": "^0.1.4",
-    "xmlhttprequest": "^1.8.0"
+    "nodemon": "^1.18.3"
   },
   "devDependencies": {},
   "scripts": {
