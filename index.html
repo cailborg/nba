@@ -1,0 +1,10 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function()
+  {
+    $.getJSON('http://www.whateverorigin.org/get?url=' + encodeURIComponent('https://stats.nba.com/stats/playerprofilev2/?playerId=201935&leagueId=00&perMode=Totals') + '&callback=?', function(data){
+      console.log(data.contents);
+    });
+  });
+  </script>
+  <div id="output"></div>
