@@ -2,8 +2,8 @@ var express = require('express')
 var fetch = require('isomorphic-fetch')
 var app = express()
 
-async function nbaFetch(){
-    let result = await fetch('https://stats.nba.com/stats/playerdashboardbygeneralsplits?DateFrom=&DateTo=&GameSegment=&LastNGames=0&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PORound=0&PaceAdjust=N&PerMode=Totals&Period=0&PlayerID=201935&PlusMinus=N&Rank=N&Season=2018-19&SeasonSegment=&SeasonType=Regular+Season&ShotClockRange=&Split=general&VsConference=&VsDivision=', {
+async function nbaFetch(playerID){
+    let result = await fetch('https://stats.nba.com/stats/playerdashboardbygeneralsplits?DateFrom=&DateTo=&GameSegment=&LastNGames=0&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PORound=0&PaceAdjust=N&PerMode=Totals&Period=0&PlayerID=' + playerID + '&PlusMinus=N&Rank=N&Season=2018-19&SeasonSegment=&SeasonType=Regular+Season&ShotClockRange=&Split=general&VsConference=&VsDivision=', {
         mode: 'cors',
         method: "GET", // *GET, POST, PUT, DELETE, etc.
         headers: {
@@ -24,10 +24,23 @@ async function nbaFetch(){
     return nbaFileStruct
 }
 app.use('/', async function (req, res, next) {
-    let result = await nbaFetch().catch(error => console.log(error))
-    var test = (JSON.stringify(result.resultSets[0].rowSet[0][26]))
-    // res.send(JSON.stringify(result.resultSets[0].rowSet[0]))
-    res.send(test)
+    let result = await nbaFetch(202691).catch(error => console.log(error))
+
+    // Grab all the values i want and add the fantasy multipliers
+    var points = (JSON.stringify(result.resultSets[0].rowSet[0][26]))*1
+    var rebounds = (JSON.stringify(result.resultSets[0].rowSet[0][18]))*1.5
+    var assists = (JSON.stringify(result.resultSets[0].rowSet[0][19]))*1.5
+    var tov = (JSON.stringify(result.resultSets[0].rowSet[0][20]))*-2
+    var steals = (JSON.stringify(result.resultSets[0].rowSet[0][21]))*2
+    var blocks = (JSON.stringify(result.resultSets[0].rowSet[0][22]))*2
+
+    // Add multiplied results into a single array
+    var total = [points, rebounds, assists, steals, blocks, tov]
+
+    //Add array values together
+
+    // Send result to client
+    res.send(total)
     
 })
 
