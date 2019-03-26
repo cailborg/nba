@@ -1,13 +1,29 @@
-var express = require('express')
 var fetch = require('isomorphic-fetch')
-var app = express()
+
+// Looping over the array of players should fill this array with results
+var output = []
+
+
+// Load in the right json object based on the player ID and calculate points
 
 async function nbaFetch(playerID){
-    let result = await fetch('https://stats.nba.com/stats/playerdashboardbygeneralsplits?DateFrom=&DateTo=&GameSegment=&LastNGames=0&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PORound=0&PaceAdjust=N&PerMode=Totals&Period=0&PlayerID=' + playerID + '&PlusMinus=N&Rank=N&Season=2018-19&SeasonSegment=&SeasonType=Regular+Season&ShotClockRange=&Split=general&VsConference=&VsDivision=', {
+    let playerdashboardbygeneralsplits = await fetch('https://stats.nba.com/stats/playerdashboardbygeneralsplits?DateFrom=&DateTo=&GameSegment=&LastNGames=0&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PORound=0&PaceAdjust=N&PerMode=Totals&Period=0&PlayerID=' + playerID + '&PlusMinus=N&Rank=N&Season=2018-19&SeasonSegment=&SeasonType=Regular+Season&ShotClockRange=&Split=general&VsConference=&VsDivision=', {
         mode: 'cors',
-        method: "GET", // *GET, POST, PUT, DELETE, etc.
+        method: "GET",
+        headers: {     
+        "accept-encoding": "Accepflate, sdch",
+        "accept-language": "he-IL,he;q=0.8,en-US;q=0.6,en;q=0.4",
+        "cache-control": "max-age=0",
+        connection: "keep-alive",
+        host: "stats.nba.com",
+        referer: "http://stats.nba.com/",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36"
+        },
+    })
+    let commonPlayerInfo = await fetch('https://stats.nba.com/stats/commonplayerinfo?LeagueID=&PlayerID=' + playerID, {
+        mode: 'cors',
+        method: "GET",
         headers: {
-            
         "accept-encoding": "Accepflate, sdch",
         "accept-language": "he-IL,he;q=0.8,en-US;q=0.6,en;q=0.4",
         "cache-control": "max-age=0",
@@ -18,30 +34,31 @@ async function nbaFetch(playerID){
         },
     })
 
-    let nbaFileStruct = await result.json()
-
-    
-    return nbaFileStruct
+    let dashboardFileStruct = await playerdashboardbygeneralsplits.json()
+    let profileFileStruct = await commonPlayerInfo.json()
+    var points = dashboardFileStruct.resultSets[0].rowSet[0][26]
+    var rebounds = dashboardFileStruct.resultSets[0].rowSet[0][18]*1.5
+    var assists = dashboardFileStruct.resultSets[0].rowSet[0][19]*1.5
+    var tov = dashboardFileStruct.resultSets[0].rowSet[0][20]*-2
+    var steals = dashboardFileStruct.resultSets[0].rowSet[0][21]*2
+    var blocks = dashboardFileStruct.resultSets[0].rowSet[0][22]*2
+    var games = dashboardFileStruct.resultSets[0].rowSet[0][2]
+    var name = profileFileStruct.resultSets[0].rowSet[0][3]
+    // var total = [name, 'TOTAL', points+rebounds+assists+steals+blocks+tov, 'PPG', (points+rebounds+assists+steals+blocks+tov)/games]
+    var total = points+rebounds+assists+steals+blocks+tov
+    console.log('total', total)
+    return total
+    // console.log(total)
+    // output.push(total)
 }
-app.use('/', async function (req, res, next) {
-    let result = await nbaFetch(202691).catch(error => console.log(error))
 
-    // Grab all the values i want and add the fantasy multipliers
-    var points = (JSON.stringify(result.resultSets[0].rowSet[0][26]))*1
-    var rebounds = (JSON.stringify(result.resultSets[0].rowSet[0][18]))*1.5
-    var assists = (JSON.stringify(result.resultSets[0].rowSet[0][19]))*1.5
-    var tov = (JSON.stringify(result.resultSets[0].rowSet[0][20]))*-2
-    var steals = (JSON.stringify(result.resultSets[0].rowSet[0][21]))*2
-    var blocks = (JSON.stringify(result.resultSets[0].rowSet[0][22]))*2
+    // Loop over each of the player IDs and push to our Output array
+    var byron = ["201935", "203081", "203497", "202331", "203078", "1627750"];
+    byron.forEach(function(entry) {
+        nbaFetch(entry).then(function(result) {
+            output.push(result)
+        })
+    });
 
-    // Add multiplied results into a single array
-    var total = [points, rebounds, assists, steals, blocks, tov]
-
-    //Add array values together
-
-    // Send result to client
-    res.send(total)
-    
-})
-
-app.listen(3001, console.log("I'm a server and I am listening on port 3001"))
+    // Log the final output
+    console.log('output', output)

@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "create-react-app": "^1.5.2",
     "express": "^4.16.3",
     "express-generator": "^4.16.0",
     "isomorphic-fetch": "^2.2.1",
