@@ -1,9 +1,5 @@
 var fetch = require('isomorphic-fetch')
 
-// Looping over the array of players should fill this array with results
-var output = []
-
-
 // Load in the right json object based on the player ID and calculate points
 
 async function nbaFetch(playerID){
@@ -46,19 +42,23 @@ async function nbaFetch(playerID){
     var name = profileFileStruct.resultSets[0].rowSet[0][3]
     // var total = [name, 'TOTAL', points+rebounds+assists+steals+blocks+tov, 'PPG', (points+rebounds+assists+steals+blocks+tov)/games]
     var total = points+rebounds+assists+steals+blocks+tov
-    console.log('total', total)
-    return total
     // console.log(total)
-    // output.push(total)
+    return total
+    
 }
+// Looping over the array of players should fill this array with results
+var output = []
 
-    // Loop over each of the player IDs and push to our Output array
-    var byron = ["201935", "203081", "203497", "202331", "203078", "1627750"];
-    byron.forEach(function(entry) {
-        nbaFetch(entry).then(function(result) {
-            output.push(result)
-        })
+// // Loop over each of the player IDs and push to our Output array
+ async function playerLoop () {
+    const players = ["201935", "203081", "203497", "202331", "203078", "1627750"];
+    await Promise.all(players.map(async (playerID) => {
+      const contents = await nbaFetch(playerID)
+      output.push(contents)
+    })).then(function() {
+        console.log(output)
+    }, function(err) {
+        // error occurred
     });
-
-    // Log the final output
-    console.log('output', output)
+  }
+  playerLoop()
