@@ -29,7 +29,7 @@ async function nbaFetch(playerID){
     return total
     
 }
-// Looping over the array of players should fill this array with results
+
 const teams = [
     {
         name: 'byron',
@@ -64,13 +64,15 @@ const teams = [
         players: ["2544", "1628368", "202689", "202683", "203114", "203506"]
     }
 ];
-
+// Loop over each of the teams & player IDs and push to our Output array
 const playerLoop = async function(teams) {
     await teams.map(function(team) {
+        // Looping over the array of players should fill this array with results
         let output = []
         Promise.all(team.players.map(async (playerID) => {
             let contents = await nbaFetch(playerID)
             output.push(contents)
+            // Wait till all the iterations have completed and process the results
         })).then(function() {
             // Sort numerically and remove smallest number
             output.sort(function(a, b){return b-a});
