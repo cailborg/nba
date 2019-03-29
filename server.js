@@ -25,37 +25,85 @@ async function nbaFetch(playerID){
     var steals = dashboardFileStruct.resultSets[0].rowSet[0][21]*2
     var blocks = dashboardFileStruct.resultSets[0].rowSet[0][22]*2
     var total = points+rebounds+assists+steals+blocks+tov
-
+    // console.log(total)
     return total
     
 }
 // Looping over the array of players should fill this array with results
+const teams = [
+    {
+        name: 'byron',
+        players: ["201935", "203081", "203497", "202331", "203078", "1627750"]
+    },
+    {
+        name: 'moir',
+        players: ["203507", "1626157", "202696", "1626156", "203500", "202710"]
+    },
+    {
+        name: 'cail',
+        players: ["203083", "203999", "203994", "201950", "202699", "202339"]
+    },
+    {
+        name: 'boyd',
+        players: ["1627732", "201942", "202681", "201566", "1629029", "202355"]
+    },
+    {
+        name: 'mick',
+        players: ["203076", "202695", "200746", "203944", "203897", "1627741"]
+    },
+    {
+        name: 'tex',
+        players: ["201142", "1629028", "201188", "201939", "1628378", "203468"]
+    },
+    {
+        name: 'trev',
+        players: ["203954", "201933", "202691", "1628369", "203991", "200794"]
+    },
+    {
+        name: 'scott',
+        players: ["2544", "1628368", "202689", "202683", "203114", "203506"]
+    }
+];
 
-const byron = ["201935", "203081", "203497", "202331", "203078", "1627750"];
-const moir = ["203507", "1626157", "202696", "1626156", "203500", "202710"];
-const cail = ["203083", "203999", "203994", "201950", "202699", "202339"];
+const playerLoop = async function(teams) {
+    await teams.map(function(team) {
+        let output = []
+        Promise.all(team.players.map(async (playerID) => {
+            let contents = await nbaFetch(playerID)
+            output.push(contents)
+        })).then(function() {
+            // Sort numerically and remove smallest number
+            output.sort(function(a, b){return b-a});
+            output.pop();
+            // Calculate sum of remaining numbers
+            let sum = output.reduce( (a, b) => { return a + b}, 0);
+            console.log(team.name, sum)
+        }, function(err) {
+            // error occurred
+        });
+    });
+}
 
 // // Loop over each of the player IDs and push to our Output array
- async function playerLoop(teamID) {   
-    let output = []
-    await Promise.all(teamID.map(async (playerID) => {
-      let contents = await nbaFetch(playerID)
-      output.push(contents)
-    })).then(function() {
-        // Sort numerically and remove smallest number
-        output.sort(function(a, b){return b-a});
-        output.pop();
-        // Calculate sum of remaining numbers
-        let sum = output.reduce( (a, b) => { return a + b}, 0);
-        // Extract name of variable to use as a label
-        function getVariableName(unknownVariable){
-            return Object.keys(unknownVariable)[0]
-          }
-        console.log(getVariableName({teamID}), sum)
-    }, function(err) {
-        // error occurred
-    });
-  }
-  playerLoop(byron)
-  playerLoop(moir)
-  playerLoop(cail)
+//  async function playerLoop(teamID) {   
+//     let output = []
+//     await Promise.all(teamID.map(async (playerID) => {
+//       let contents = await nbaFetch(playerID)
+//       output.push(contents)
+//     })).then(function() {
+//         // Sort numerically and remove smallest number
+//         output.sort(function(a, b){return b-a});
+//         output.pop();
+//         // Calculate sum of remaining numbers
+//         let sum = output.reduce( (a, b) => { return a + b}, 0);
+//         console.log(sum)
+//     }, function(err) {
+//         // error occurred
+//     });
+//   }
+
+  
+
+  playerLoop(teams)
+  // playerLoop(mick)
+  // playerLoop(cail)
