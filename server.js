@@ -16,7 +16,7 @@ async function nbaFetch(playerID){
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36"
         },
     })
-
+    // Grab the right values and add fantasy multipliers
     let dashboardFileStruct = await playerdashboardbygeneralsplits.json()
     var points = dashboardFileStruct.resultSets[0].rowSet[0][26]
     var rebounds = dashboardFileStruct.resultSets[0].rowSet[0][18]*1.5
@@ -24,12 +24,12 @@ async function nbaFetch(playerID){
     var tov = dashboardFileStruct.resultSets[0].rowSet[0][20]*-2
     var steals = dashboardFileStruct.resultSets[0].rowSet[0][21]*2
     var blocks = dashboardFileStruct.resultSets[0].rowSet[0][22]*2
+    // Spit out the sum total
     var total = points+rebounds+assists+steals+blocks+tov
-    // console.log(total)
     return total
-    
 }
 
+// Team names and player IDs for each go here
 const teams = [
     {
         name: 'byron',
@@ -64,6 +64,8 @@ const teams = [
         players: ["2544", "1628368", "202689", "202683", "203114", "203506"]
     }
 ];
+
+
 // Loop over each of the teams & player IDs and push to our Output array
 const playerLoop = async function(teams) {
     await teams.map(function(team) {
@@ -86,26 +88,5 @@ const playerLoop = async function(teams) {
     });
 }
 
-// // Loop over each of the player IDs and push to our Output array
-//  async function playerLoop(teamID) {   
-//     let output = []
-//     await Promise.all(teamID.map(async (playerID) => {
-//       let contents = await nbaFetch(playerID)
-//       output.push(contents)
-//     })).then(function() {
-//         // Sort numerically and remove smallest number
-//         output.sort(function(a, b){return b-a});
-//         output.pop();
-//         // Calculate sum of remaining numbers
-//         let sum = output.reduce( (a, b) => { return a + b}, 0);
-//         console.log(sum)
-//     }, function(err) {
-//         // error occurred
-//     });
-//   }
-
-  
-
-  playerLoop(teams)
-  // playerLoop(mick)
-  // playerLoop(cail)
+// Trigger the function
+playerLoop(teams)
