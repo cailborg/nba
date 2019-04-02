@@ -3,7 +3,7 @@ var fetch = require('isomorphic-fetch')
 // Load in the right json object based on the player ID and calculate points
 
 async function nbaFetch(playerID){
-    let playerdashboardbygeneralsplits = await fetch('https://stats.nba.com/stats/playerdashboardbygeneralsplits?DateFrom=&DateTo=&GameSegment=&LastNGames=0&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PORound=0&PaceAdjust=N&PerMode=Totals&Period=0&PlayerID=' + playerID + '&PlusMinus=N&Rank=N&Season=2018-19&SeasonSegment=&SeasonType=Regular+Season&ShotClockRange=&Split=general&VsConference=&VsDivision=', {
+    let playerdashboardbygeneralsplits = await fetch('https://www.balldontlie.io/api/v1/stats?seasons[]=2018&per_page=100&player_ids[]=' + playerID + '&postseason=false', {
         mode: 'cors',
         method: "GET",
         headers: {     
@@ -11,57 +11,73 @@ async function nbaFetch(playerID){
         "accept-language": "he-IL,he;q=0.8,en-US;q=0.6,en;q=0.4",
         "cache-control": "max-age=0",
         connection: "keep-alive",
-        host: "stats.nba.com",
-        referer: "http://stats.nba.com/",
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36"
         },
     })
-    // Grab the right values and add fantasy multipliers
-    let dashboardFileStruct = await playerdashboardbygeneralsplits.json()
-    var points = dashboardFileStruct.resultSets[0].rowSet[0][26]
-    var rebounds = dashboardFileStruct.resultSets[0].rowSet[0][18]*1.5
-    var assists = dashboardFileStruct.resultSets[0].rowSet[0][19]*1.5
-    var tov = dashboardFileStruct.resultSets[0].rowSet[0][20]*-2
-    var steals = dashboardFileStruct.resultSets[0].rowSet[0][21]*2
-    var blocks = dashboardFileStruct.resultSets[0].rowSet[0][22]*2
-    // Spit out the sum total
-    var total = points+rebounds+assists+steals+blocks+tov
+
+    let nbaFileStruct = await playerdashboardbygeneralsplits.json()
+    let game = nbaFileStruct.data
+// Loop through each game to grab each stat and push them into an array
+    let assists = []
+    let points = []
+    let rebounds = []
+    let tov = []
+    let steals = []
+    let blocks = []
+      game.map(function(elem) {
+        assists.push(elem.ast)
+        points.push(elem.pts)
+        rebounds.push(elem.reb)
+        tov.push(elem.turnover)
+        steals.push(elem.stl)
+        blocks.push(elem.blk)
+      });
+// Reduce each array to its sum
+    let sumPoints = points.reduce( (a, b) => { return a + b}, 0);
+    let sumAssists = assists.reduce( (a, b) => { return a + b}, 0);
+    let sumRebounds = rebounds.reduce( (a, b) => { return a + b}, 0);
+    let sumSteals = steals.reduce( (a, b) => { return a + b}, 0);
+    let sumBlocks = blocks.reduce( (a, b) => { return a + b}, 0);
+    let sumTOV = tov.reduce( (a, b) => { return a + b}, 0);
+// Add the results and the custom multipliers to get a total points for each player
+    let total = sumPoints + sumAssists*1.5 + sumRebounds*1.5 + sumSteals*2 + sumBlocks*2 - sumTOV*2
+
     return total
+    
 }
 
 // Team names and player IDs for each go here
 const teams = [
     {
-        name: 'byron',
-        players: ["201935", "203081", "203497", "202331", "203078", "1627750"]
+        name: 'Byron',
+        players: ["192", "278", "176", "172", "37", "335"]
     },
     {
-        name: 'moir',
-        players: ["203507", "1626157", "202696", "1626156", "203500", "202710"]
+        name: 'Moir',
+        players: ["2176", "447", "460", "405", "3", "79"]
     },
     {
-        name: 'cail',
-        players: ["203083", "203999", "203994", "201950", "202699", "202339"]
+        name: 'Cail',
+        players: ["137", "246", "349", "214", "200", "51"]
     },
     {
-        name: 'boyd',
-        players: ["1627732", "201942", "202681", "201566", "1629029", "202355"]
+        name: 'Boyd',
+        players: ["417", "125", "228", "472", "132", "474"]
     },
     {
-        name: 'mick',
-        players: ["203076", "202695", "200746", "203944", "203897", "1627741"]
+        name: 'Mick',
+        players: ["117", "274", "6", "387", "268", "210"]
     },
     {
-        name: 'tex',
-        players: ["201142", "1629028", "201188", "201939", "1628378", "203468"]
+        name: 'Tex',
+        players: ["140", "22", "169", "115", "322", "303"]
     },
     {
-        name: 'trev',
-        players: ["203954", "201933", "202691", "1628369", "203991", "200794"]
+        name: 'Trev',
+        players: ["145", "189", "443", "434", "83", "318"]
     },
     {
-        name: 'scott',
-        players: ["2544", "1628368", "202689", "202683", "203114", "1628381"]
+        name: 'Scott',
+        players: ["237", "161", "465", "253", "315", "101"]
     }
 ];
 
