@@ -40,9 +40,7 @@ async function nbaFetch(playerID){
     let sumTOV = tov.reduce( (a, b) => { return a + b}, 0);
 // Add the results and the custom multipliers to get a total points for each player
     let total = sumPoints + sumAssists*1.5 + sumRebounds*1.5 + sumSteals*2 + sumBlocks*2 - sumTOV*2
-
     return total
-    
 }
 
 // Team names and player IDs for each go here
@@ -53,7 +51,7 @@ const teams = [
     },
     {
         name: 'Moir',
-        players: ["2176", "447", "460", "405", "3", "79"]
+        players: ["15", "447", "460", "405", "3", "79"]
     },
     {
         name: 'Cail',
@@ -81,13 +79,12 @@ const teams = [
     }
 ];
 
-
 // Loop over each of the teams & player IDs and push to our Output array
 const playerLoop = async function(teams) {
-    await teams.map(function(team) {
+    return await Promise.all(teams.map(function(team) {
         // Looping over the array of players should fill this array with results
         let output = []
-        Promise.all(team.players.map(async (playerID) => {
+        return Promise.all(team.players.map(async (playerID) => {
             let contents = await nbaFetch(playerID)
             output.push(contents)
             // Wait till all the iterations have completed and process the results
@@ -97,12 +94,21 @@ const playerLoop = async function(teams) {
             output.pop();
             // Calculate sum of remaining numbers
             let sum = output.reduce( (a, b) => { return a + b}, 0);
-            console.log(team.name, sum)
+            // console.log(team.name, sum)
+            return team.name + sum
         }, function(err) {
             // error occurred
         });
-    });
+    }));
 }
 
-// Trigger the function
-playerLoop(teams)
+//Return all the sums and then do something
+
+async function main(){
+    let value = await playerLoop(teams);
+    console.log(value);
+    console.log('success');
+  };
+
+//Trigger the function
+main()
